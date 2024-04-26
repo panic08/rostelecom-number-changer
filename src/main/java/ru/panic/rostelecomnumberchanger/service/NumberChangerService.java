@@ -65,7 +65,14 @@ public class NumberChangerService {
 
         long currentTimestamp = System.currentTimeMillis();
 
-        loop1: while (System.currentTimeMillis() - currentTimestamp <= 130000) {
+        loop1: while (System.currentTimeMillis() - currentTimestamp <= 30000) {
+            rostelecomApi.getAccountInfo(RostelecomGetAccountInfoRequest.builder()
+                    .accountId(rostelecomAccountId)
+                    .clientUuid("7750992C-265A-43CC-98BA-CC7AAD47BC69")
+                    .currentPage("account")
+                    .pageUuid("59B74B2B-CA0D-4752-96DF-77F10BC8DDFC")
+                    .build(), rostelecomCookieString);
+
             RostelecomGetAccountServicesMainInfoResponse rostelecomGetAccountServicesMainInfoResponse1 =
                     rostelecomApi.getAccountServicesMainInfo(RostelecomGetAccountServicesMainInfoRequest.builder()
                             .accountId(rostelecomAccountId)

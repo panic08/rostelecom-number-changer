@@ -54,4 +54,15 @@ public class RostelecomApi {
         restTemplate.exchange(ROSTELECOM_API_URL + "/client-api/changeDefNumber",
                         HttpMethod.POST, requestEntity, Void.class);
     }
+
+    public void getAccountInfo(RostelecomGetAccountInfoRequest request, String cookieString) {
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.set("Cookie", cookieString);
+
+        HttpEntity<RostelecomGetAccountInfoRequest> requestEntity = new HttpEntity<>(request, headers);
+
+        restTemplate.exchange(ROSTELECOM_API_URL + "/client-api/getAccountInfo",
+                HttpMethod.POST, requestEntity, Void.class);
+    }
 }
