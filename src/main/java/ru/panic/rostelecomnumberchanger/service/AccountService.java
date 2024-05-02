@@ -17,9 +17,12 @@ public class AccountService {
     public CreateAccountResponse create(CreateAccountRequest createAccountRequest) {
         String key = UUID.randomUUID().toString();
 
+        String cookieString = createAccountRequest.getCookieString();
+
         accountComponent.getKeyAccountMap().put(key, AccountComponent.Account.builder()
                 .accountId(createAccountRequest.getAccountId())
-                .cookieString(createAccountRequest.getCookieString())
+                .cookieString(cookieString)
+                .dolphinProfileId(createAccountRequest.getDolphinProfileId())
                 .build());
 
         return CreateAccountResponse.builder()

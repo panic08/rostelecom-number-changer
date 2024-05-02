@@ -10,6 +10,9 @@ public class CreateAccountRequest {
     @JsonProperty("account_id")
     private long accountId;
 
+    @JsonProperty("dolphin_profile_id")
+    private long dolphinProfileId;
+
     @JsonProperty("cookie_string")
     private String cookieString;
 }

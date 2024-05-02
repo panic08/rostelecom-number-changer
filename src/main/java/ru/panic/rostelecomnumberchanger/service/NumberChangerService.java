@@ -20,8 +20,10 @@ public class NumberChangerService {
     private final RostelecomApi rostelecomApi;
 
     public NumberChangerChangeResponse rostelecomChange(String accountKey, int numberIndex) {
-        long rostelecomAccountId = accountComponent.getKeyAccountMap().get(accountKey).getAccountId();
-        String rostelecomCookieString = accountComponent.getKeyAccountMap().get(accountKey).getCookieString();
+        AccountComponent.Account rostelecomAccount = accountComponent.getKeyAccountMap().get(accountKey);
+
+        long rostelecomAccountId = rostelecomAccount.getAccountId();
+        String rostelecomCookieString = rostelecomAccount.getCookieString();
 
         RostelecomGetAccountServicesMainInfoResponse rostelecomGetAccountServicesMainInfoResponse =
                 rostelecomApi.getAccountServicesMainInfo(RostelecomGetAccountServicesMainInfoRequest.builder()
@@ -65,7 +67,7 @@ public class NumberChangerService {
 
         long currentTimestamp = System.currentTimeMillis();
 
-        loop1: while (System.currentTimeMillis() - currentTimestamp <= 30000) {
+        loop1: while (System.currentTimeMillis() - currentTimestamp <= 25000) {
             rostelecomApi.getAccountInfo(RostelecomGetAccountInfoRequest.builder()
                     .accountId(rostelecomAccountId)
                     .clientUuid("7750992C-265A-43CC-98BA-CC7AAD47BC69")

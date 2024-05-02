@@ -17,7 +17,7 @@ public class NumberChangerController {
 
     @PostMapping("/rostelecom/change")
     public ResponseEntity<NumberChangerChangeResponse> rostelecomChange(@RequestParam("account_key") String accountKey,
-                                                              @RequestParam("number_index") int numberIndex) {
+                                                                        @RequestParam("number_index") int numberIndex) {
         return ResponseEntity.ok(numberChangerService.rostelecomChange(accountKey, numberIndex));
     }
 }

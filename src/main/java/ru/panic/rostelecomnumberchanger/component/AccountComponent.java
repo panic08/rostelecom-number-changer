@@ -20,5 +20,6 @@ public class AccountComponent {
     public static class Account {
         private Long accountId;
         private String cookieString;
+        private Long dolphinProfileId;
     }
 }
