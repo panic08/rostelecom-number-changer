@@ -2,39 +2,57 @@ package ru.panic.rostelecomnumberchanger.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.panic.rostelecomnumberchanger.component.AccountComponent;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import ru.panic.rostelecomnumberchanger.dto.AccountDto;
+import ru.panic.rostelecomnumberchanger.mapper.AccountToAccountDtoMapperImpl;
+import ru.panic.rostelecomnumberchanger.model.Account;
 import ru.panic.rostelecomnumberchanger.payload.CreateAccountRequest;
 import ru.panic.rostelecomnumberchanger.payload.CreateAccountResponse;
+import ru.panic.rostelecomnumberchanger.payload.GetJsonCookieStringResponse;
 import ru.panic.rostelecomnumberchanger.payload.UpdateCookieStringRequest;
-
-import java.util.UUID;
+import ru.panic.rostelecomnumberchanger.repository.AccountRepository;
 
 @Service
 @RequiredArgsConstructor
 public class AccountService {
-    private final AccountComponent accountComponent;
+    private final AccountRepository accountRepository;
+    private final AccountToAccountDtoMapperImpl accountToAccountDtoMapper;
 
+    public AccountDto get(long id) {
+        return accountToAccountDtoMapper.accountToAccountDto(accountRepository.findById(id)
+                .orElseThrow());
+    }
+
+    public GetJsonCookieStringResponse getJsonCookieString(long id) {
+        return GetJsonCookieStringResponse.builder()
+                .jsonCookieString(accountRepository.findJsonCookieStringById(id)
+                        .orElse(null))
+                .build();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public CreateAccountResponse create(CreateAccountRequest createAccountRequest) {
-        String key = UUID.randomUUID().toString();
-
         String cookieString = createAccountRequest.getCookieString();
 
-        accountComponent.getKeyAccountMap().put(key, AccountComponent.Account.builder()
+        Account newAccount = accountRepository.save(Account.builder()
                 .accountId(createAccountRequest.getAccountId())
                 .cookieString(cookieString)
                 .dolphinProfileId(createAccountRequest.getDolphinProfileId())
                 .build());
 
         return CreateAccountResponse.builder()
-                .key(key)
+                .id(newAccount.getId())
                 .build();
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateCookieString(UpdateCookieStringRequest updateCookieStringRequest) {
-        AccountComponent.Account currentAccount = accountComponent.getKeyAccountMap().get(updateCookieStringRequest.getKey());
+        accountRepository.updateCookieStringById(updateCookieStringRequest.getCookieString(), updateCookieStringRequest.getId());
+    }
 
-        currentAccount.setCookieString(updateCookieStringRequest.getCookieString());
-
-        accountComponent.getKeyAccountMap().put(updateCookieStringRequest.getKey(), currentAccount);
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void delete(long id) {
+        accountRepository.deleteById(id);
     }
 }

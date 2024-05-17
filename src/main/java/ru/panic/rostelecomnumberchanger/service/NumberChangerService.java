@@ -5,8 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.panic.rostelecomnumberchanger.api.RostelecomApi;
 import ru.panic.rostelecomnumberchanger.api.payload.*;
-import ru.panic.rostelecomnumberchanger.component.AccountComponent;
+import ru.panic.rostelecomnumberchanger.model.Account;
 import ru.panic.rostelecomnumberchanger.payload.NumberChangerChangeResponse;
+import ru.panic.rostelecomnumberchanger.repository.AccountRepository;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -16,11 +17,11 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 public class NumberChangerService {
-    private final AccountComponent accountComponent;
+    private final AccountRepository accountRepository;
     private final RostelecomApi rostelecomApi;
 
-    public NumberChangerChangeResponse rostelecomChange(String accountKey, int numberIndex) {
-        AccountComponent.Account rostelecomAccount = accountComponent.getKeyAccountMap().get(accountKey);
+    public NumberChangerChangeResponse rostelecomChange(long id, int numberIndex) {
+        Account rostelecomAccount = accountRepository.findById(id).orElse(null);
 
         long rostelecomAccountId = rostelecomAccount.getAccountId();
         String rostelecomCookieString = rostelecomAccount.getCookieString();
@@ -67,7 +68,7 @@ public class NumberChangerService {
 
         long currentTimestamp = System.currentTimeMillis();
 
-        loop1: while (System.currentTimeMillis() - currentTimestamp <= 25000) {
+        firstLoop: while (System.currentTimeMillis() - currentTimestamp <= 25000) {
             rostelecomApi.getAccountInfo(RostelecomGetAccountInfoRequest.builder()
                     .accountId(rostelecomAccountId)
                     .clientUuid("7750992C-265A-43CC-98BA-CC7AAD47BC69")
@@ -104,7 +105,7 @@ public class NumberChangerService {
                     } catch (InterruptedException e) {
                         log.warn(e.getMessage());
                     }
-                    continue loop1;
+                    continue firstLoop;
                 }
             }
         }

@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 @Builder
 public class CreateAccountResponse {
-    private String key;
+    private long id;
 }

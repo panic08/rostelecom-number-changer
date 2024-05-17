@@ -8,29 +8,29 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 import ru.panic.rostelecomnumberchanger.api.DolphinAntyApi;
 import ru.panic.rostelecomnumberchanger.api.payload.DolphinAntyGetCookiesResponse;
-import ru.panic.rostelecomnumberchanger.component.AccountComponent;
+import ru.panic.rostelecomnumberchanger.model.Account;
+import ru.panic.rostelecomnumberchanger.repository.AccountRepository;
 import ru.panic.rostelecomnumberchanger.util.cookie.CookieUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class DolphinAccountCookieUpdaterScheduler {
-    private final AccountComponent accountComponent;
+    private final AccountRepository accountRepository;
     private final DolphinAntyApi dolphinAntyApi;
-    private final CookieUtil cookieUtil;
+    private final CookieUtil cookieUtil;;
     private final ObjectMapper objectMapper;
 
     @Scheduled(fixedDelay = 5000)
     public void updateAccountCookie() {
         log.info("Starting updating account cookie");
 
-        for (Map.Entry<String, AccountComponent.Account> entry : accountComponent.getKeyAccountMap().entrySet()) {
-            AccountComponent.Account account = entry.getValue();
+        Iterable<Account> accountList = accountRepository.findAll();
 
+        for (Account account : accountList) {
             dolphinAntyApi.startBrowserProfile(account.getDolphinProfileId(), 1);
 
             try {
@@ -40,6 +40,13 @@ public class DolphinAccountCookieUpdaterScheduler {
             }
 
             dolphinAntyApi.stopBrowserProfile(account.getDolphinProfileId());
+
+            try {
+                Thread.sleep(2000);
+                dolphinAntyApi.stopBrowserProfile(account.getDolphinProfileId());
+            } catch (InterruptedException e) {
+                log.warn(e.getMessage());
+            }
 
             try {
                 Thread.sleep(5500);
@@ -58,9 +65,15 @@ public class DolphinAccountCookieUpdaterScheduler {
                 log.error(e.getMessage());
             }
 
-            account.setCookieString(cookieUtil.convertFromJsonToDefaultWithSkips(jsonCookieString,
-                    new ArrayList<>(List.of("yandex", "kaspersky", "mail", "google", "vk")),
-                    new ArrayList<>(List.of("__zzatw-rt-lk"))));
+            jsonCookieString = cookieUtil.extractDomain(jsonCookieString,
+                    new ArrayList<>(List.of("yandex", "kaspersky", "mail", "google", "vk")));
+            jsonCookieString = cookieUtil.extractName(jsonCookieString,
+                    new ArrayList<>(List.of("__zzatw-rt-lk")));
+
+            account.setJsonCookieString(jsonCookieString);
+            account.setCookieString(cookieUtil.convertFromJsonToRequest(jsonCookieString));
+
+            accountRepository.save(account);
 
             try {
                 Thread.sleep(3500);
