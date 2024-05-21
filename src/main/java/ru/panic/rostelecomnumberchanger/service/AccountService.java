@@ -35,9 +35,11 @@ public class AccountService {
     public CreateAccountResponse create(CreateAccountRequest createAccountRequest) {
         String cookieString = createAccountRequest.getCookieString();
 
+        //todo improve jsonCookieString from NOT NULL TO NULL
         Account newAccount = accountRepository.save(Account.builder()
                 .accountId(createAccountRequest.getAccountId())
                 .cookieString(cookieString)
+                .jsonCookieString("default")
                 .dolphinProfileId(createAccountRequest.getDolphinProfileId())
                 .build());
 

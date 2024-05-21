@@ -28,7 +28,7 @@ public class DolphinAccountCookieUpdaterScheduler {
     public void updateAccountCookie() {
         log.info("Starting updating account cookie");
 
-        Iterable<Account> accountList = accountRepository.findAll();
+        List<Account> accountList = accountRepository.findAllOrderByIdDesc();
 
         for (Account account : accountList) {
             dolphinAntyApi.startBrowserProfile(account.getDolphinProfileId(), 1);
